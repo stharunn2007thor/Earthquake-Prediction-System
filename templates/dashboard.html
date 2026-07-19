@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>Earthquake Dashboard</title>
+
+<link
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+rel="stylesheet">
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<style>
+
+body{
+
+background:linear-gradient(
+135deg,
+#0f172a,
+#1e293b
+);
+
+color:white;
+
+min-height:100vh;
+
+}
+
+.navbar{
+
+background:#111827;
+
+}
+
+.card{
+
+background:rgba(
+255,
+255,
+255,
+0.1
+);
+
+backdrop-filter:blur(15px);
+
+border:none;
+
+border-radius:20px;
+
+transition:0.4s;
+
+box-shadow:0 10px 25px rgba(
+0,
+0,
+0,
+0.3
+);
+
+}
+
+.card:hover{
+
+transform:translateY(-8px);
+
+}
+
+.chart-box{
+
+background:rgba(
+255,
+255,
+255,
+0.08
+);
+
+padding:25px;
+
+border-radius:20px;
+
+margin-top:30px;
+
+box-shadow:0 10px 25px rgba(
+0,
+0,
+0,
+0.3
+);
+
+}
+
+h1{
+
+font-weight:bold;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<nav class="navbar navbar-dark">
+
+<div class="container">
+
+<span class="navbar-brand">
+
+📊 Earthquake Analytics Dashboard
+
+</span>
+
+<div>
+
+<a href="/"
+class="btn btn-primary">
+
+🏠 Home
+
+</a>
+
+</div>
+
+</div>
+
+</nav>
+
+
+
+<div class="container mt-5">
+
+
+<div class="row">
+
+<div class="col-md-3">
+
+<div class="card p-4 text-center">
+
+<h4>
+
+📊 Total Predictions
+
+</h4>
+
+<h1>
+
+{{ total_predictions }}
+
+</h1>
+
+</div>
+
+</div>
+
+
+
+<div class="col-md-3">
+
+<div class="card p-4 text-center">
+
+<h4>
+
+🔴 High Risk
+
+</h4>
+
+<h1>
+
+{{ high_risk }}
+
+</h1>
+
+</div>
+
+</div>
+
+
+
+<div class="col-md-3">
+
+<div class="card p-4 text-center">
+
+<h4>
+
+🟢 Low Risk
+
+</h4>
+
+<h1>
+
+{{ low_risk }}
+
+</h1>
+
+</div>
+
+</div>
+
+
+
+<div class="col-md-3">
+
+<div class="card p-4 text-center">
+
+<h4>
+
+⚡ Average Confidence
+
+</h4>
+
+<h1>
+
+{{ average_confidence }}%
+
+</h1>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<div class="row mt-5">
+
+<div class="col-md-6">
+
+<div class="chart-box">
+
+<div id="pie_chart">
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="col-md-6">
+
+<div class="chart-box">
+
+<div id="bar_chart">
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<div class="chart-box">
+
+<div id="confidence_chart">
+
+</div>
+
+</div>
+
+
+
+<div class="chart-box">
+
+<div id="trend_chart">
+
+</div>
+
+</div>
+
+
+
+<div class="chart-box">
+
+<div id="gauge_chart">
+
+</div>
+
+</div>
+
+
+
+<div class="chart-box">
+
+<div id="heatmap">
+
+</div>
+
+</div>
+
+
+
+<div class="chart-box">
+
+<div id="location_chart">
+
+</div>
+
+</div>
+
+
+<script>
+
+// ================= PIE CHART =================
+
+Plotly.newPlot(
+
+'pie_chart',
+
+[{
+
+values:[
+
+{{ high_risk }},
+
+{{ low_risk }}
+
+],
+
+labels:[
+
+'High Risk',
+
+'Low Risk'
+
+],
+
+type:'pie'
+
+}],
+
+{
+
+title:'Risk Distribution'
+
+}
+
+);
+
+
+// ================= BAR CHART =================
+
+Plotly.newPlot(
+
+'bar_chart',
+
+[{
+
+x:[
+
+'High Risk',
+
+'Low Risk'
+
+],
+
+y:[
+
+{{ high_risk }},
+
+{{ low_risk }}
+
+],
+
+type:'bar'
+
+}],
+
+{
+
+title:'Prediction Count'
+
+}
+
+);
+
+
+// ================= CONFIDENCE GRAPH =================
+
+Plotly.newPlot(
+
+'confidence_chart',
+
+[{
+
+y:{{ confidence_values|tojson }},
+
+mode:'lines+markers',
+
+type:'scatter'
+
+}],
+
+{
+
+title:'Confidence Distribution'
+
+}
+
+);
+
+
+// ================= TREND GRAPH =================
+
+Plotly.newPlot(
+
+'trend_chart',
+
+[{
+
+x:{{ prediction_numbers|tojson }},
+
+y:{{ confidence_values|tojson }},
+
+mode:'lines',
+
+type:'scatter'
+
+}],
+
+{
+
+title:'Prediction Trend'
+
+}
+
+);
+
+
+// ================= GAUGE METER =================
+
+Plotly.newPlot(
+
+'gauge_chart',
+
+[{
+
+type:"indicator",
+
+mode:"gauge+number",
+
+value:{{ average_confidence }},
+
+title:{
+
+text:"Average Confidence"
+
+},
+
+gauge:{
+
+axis:{
+
+range:[0,100]
+
+}
+
+}
+
+}]
+
+);
+
+
+// ================= HEATMAP =================
+
+Plotly.newPlot(
+
+'heatmap',
+
+[{
+
+z:[
+
+{{ confidence_values|tojson }}
+
+],
+
+type:'heatmap'
+
+}],
+
+{
+
+title:'Confidence Heatmap'
+
+}
+
+);
+
+
+// ================= LOCATION GRAPH =================
+
+Plotly.newPlot(
+
+'location_chart',
+
+[{
+
+x:{{ longitudes|tojson }},
+
+y:{{ latitudes|tojson }},
+
+mode:'markers',
+
+type:'scatter',
+
+marker:{
+
+size:12
+
+}
+
+}],
+
+{
+
+title:'Earthquake Locations',
+
+xaxis:{
+
+title:'Longitude'
+
+},
+
+yaxis:{
+
+title:'Latitude'
+
+}
+
+}
+
+);
+
+</script>
+
+</div>
+
+</body>
+
+</html>
